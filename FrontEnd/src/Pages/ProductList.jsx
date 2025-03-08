@@ -1,12 +1,27 @@
 import axios from 'axios';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
+import { Trash2 } from 'lucide-react';
 
 const fetchProducts = async () => {
-  const response = await axios.get('https://dummyjson.com/products');
-  return response.data.products;
+  const { data } = await axios.get('http://localhost:8080/api/v1/products/all');
+  return data.data.products;
 };
 const ProductList = () => {
+  const queryClient = useQueryClient();
+
+  const mutation = useMutation({
+    mutationFn: (id) => {
+      return axios.delete(`http://localhost:8080/api/v1/products/${id}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries(['products']);
+    },
+    onError: (error) => {
+      console.log(error);
+    },
+  });
+
   const {
     isLoading,
     error,
@@ -34,6 +49,10 @@ const ProductList = () => {
         <div className="mt-6 grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-4 xl:gap-x-8">
           {products.map((product) => (
             <div key={product.id} className="group relative">
+              <Trash2
+                onClick={() => mutation.mutate(product.id)}
+                className="absolute right-1 top-1 text-red-500 bg-white p-1 z-50 cursor-pointer   rounded-full"
+              />
               <img
                 crossOrigin="anonymous"
                 alt={product.title}

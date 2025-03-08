@@ -6,8 +6,10 @@ const Product = () => {
   const { id } = useParams();
 
   const fetchProduct = async () => {
-    const { data } = await axios.get(`https://dummyjson.com/products/${id}`);
-    return data;
+    const { data } = await axios.get(
+      `http://localhost:8080/api/v1/products/${id}`,
+    );
+    return data.data.product;
   };
 
   const {
